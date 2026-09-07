@@ -13,7 +13,7 @@ from app import app
 
 def test_healthz():
     with TestClient(app) as c:
-        r = c.get("/healthz")
+        r = c.get("/health")
         assert r.status_code == 200
         assert r.json()["status"] == "ok"
 

@@ -10,9 +10,6 @@ MODEL_PATH = os.getenv("MODEL_PATH", "models/onnx-int8/model.onnx")
 MODEL_ID = "distilbert-base-uncased-finetuned-sst-2-english"
 LABELS = {0: "NEGATIVE", 1: "POSITIVE"}
 
-app = FastAPI(title="inference-lab", version="1.0.0")
-app.mount("/metrics", make_asgi_app())
-
 REQS = Counter("predict_requests_total", "Prediction requests", ["status"])
 LAT = Histogram("predict_latency_seconds", "End-to-end predict latency",
                 buckets=(.005, .01, .025, .05, .1, .25, .5, 1.0))

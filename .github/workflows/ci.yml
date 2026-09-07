@@ -1,0 +1,50 @@
+# .github/workflows/ci.yml
+name: ci
+on:
+  push: { branches: [main] }
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+      - run: pip install -r requirements.txt pytest httpx
+      - name: Export and quantize
+        run: |
+          optimum-cli export onnx \
+            --model distilbert-base-uncased-finetuned-sst-2-english \
+            --task text-classification models/onnx/
+          python src/quantize.py
+      - run: pytest tests/ -v
+
+  docker:
+    runs-on: ubuntu-latest
+    needs: test
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.11" }
+      - run: pip install -r requirements.txt
+      - name: Build model artifact
+        run: |
+          optimum-cli export onnx \
+            --model distilbert-base-uncased-finetuned-sst-2-english \
+            --task text-classification models/onnx/
+          python src/quantize.py
+      - name: Build image
+        run: docker build -t inference-lab:ci .
+      - name: Smoke test the container
+        run: |
+          docker run -d -p 8080:8080 --name svc inference-lab:ci
+          for i in $(seq 1 30); do
+            curl -sf localhost:8080/healthz && break || sleep 2
+          done
+          curl -sf -X POST localhost:8080/predict \
+            -H 'content-type: application/json' \
+            -d '{"texts":["great film"]}' | grep -q POSITIVE
+          docker rm -f svc

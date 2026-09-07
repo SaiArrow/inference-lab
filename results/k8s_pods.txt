@@ -1,0 +1,3 @@
+NAME                             READY   STATUS    RESTARTS   AGE
+inference-lab-7dc8465dbb-7kphs   1/1     Running   0          12m
+inference-lab-7dc8465dbb-z9jq5   1/1     Running   0          19m

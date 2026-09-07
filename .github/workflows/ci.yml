@@ -46,7 +46,7 @@ jobs:
         run: |
           docker run -d -p 8080:8080 --name svc inference-lab:ci
           for i in $(seq 1 30); do
-            curl -sf localhost:8080/healthz && break || sleep 2
+            curl -sf localhost:8080/health && break || sleep 2
           done
           curl -sf -X POST localhost:8080/predict \
             -H 'content-type: application/json' \

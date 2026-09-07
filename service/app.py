@@ -183,7 +183,7 @@ class Req(BaseModel):
     texts: list[str]
 
 
-@app.get("/healthz")
+@app.get("/health")
 def healthz():
     return {"status": "ok", "model": MODEL_PATH, "batching": BATCHING}
 

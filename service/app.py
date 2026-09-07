@@ -21,16 +21,30 @@ TOKENIZER_PATH = os.getenv("TOKENIZER_PATH", "tokenizer")
 tok = None
 sess = None
 
-class Req(BaseModel):
-    texts: list[str]
+from contextlib import asynccontextmanager
 
-@app.on_event("startup")
-def load():
+@asynccontextmanager
+async def lifespan(app: FastAPI):
     global tok, sess
     tok = AutoTokenizer.from_pretrained(TOKENIZER_PATH)
     so = ort.SessionOptions()
     so.intra_op_num_threads = int(os.getenv("ORT_THREADS", "2"))
     sess = ort.InferenceSession(MODEL_PATH, so, providers=["CPUExecutionProvider"])
+    yield
+
+app = FastAPI(title="inference-lab", version="1.0.0", lifespan=lifespan)
+app.mount("/metrics", make_asgi_app())
+
+class Req(BaseModel):
+    texts: list[str]
+
+# @app.on_event("startup")
+# def load():
+#     global tok, sess
+#     tok = AutoTokenizer.from_pretrained(TOKENIZER_PATH)
+#     so = ort.SessionOptions()
+#     so.intra_op_num_threads = int(os.getenv("ORT_THREADS", "2"))
+#     sess = ort.InferenceSession(MODEL_PATH, so, providers=["CPUExecutionProvider"])
 
 @app.get("/healthz")
 def healthz():
@@ -38,6 +52,9 @@ def healthz():
 
 @app.post("/predict")
 def predict(req: Req):
+    if not req.texts:
+        REQS.labels("ok").inc()
+        return {"predictions": [], "latency_ms": 0.0}
     t0 = time.perf_counter()
     try:
         enc = tok(req.texts, return_tensors="np", padding="max_length",

@@ -1,0 +1,24 @@
+.git/
+.github/
+.venv/
+venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+
+# large model variants the image doesn't need
+models/onnx/
+models/torchscript/
+sym_shape_infer_temp*
+
+# not needed at runtime
+results/
+loadtest/
+tests/
+src/
+k8s/
+triton/
+*.md
+!README.md
+slurm-*.out
+.env

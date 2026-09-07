@@ -18,7 +18,7 @@ LAT = Histogram("predict_latency_seconds", "End-to-end predict latency",
                 buckets=(.005, .01, .025, .05, .1, .25, .5, 1.0))
 
 TOKENIZER_PATH = os.getenv("TOKENIZER_PATH", "tokenizer")
-tok = AutoTokenizer.from_pretrained(TOKENIZER_PATH)
+tok = None
 sess = None
 
 class Req(BaseModel):
@@ -27,7 +27,7 @@ class Req(BaseModel):
 @app.on_event("startup")
 def load():
     global tok, sess
-    tok = AutoTokenizer.from_pretrained(MODEL_ID)
+    tok = AutoTokenizer.from_pretrained(TOKENIZER_PATH)
     so = ort.SessionOptions()
     so.intra_op_num_threads = int(os.getenv("ORT_THREADS", "2"))
     sess = ort.InferenceSession(MODEL_PATH, so, providers=["CPUExecutionProvider"])

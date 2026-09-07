@@ -1,0 +1,11 @@
+torch==2.4.1
+transformers==4.44.2
+optimum[exporters]==1.22.0
+onnx==1.16.2
+onnxruntime==1.19.2
+datasets==2.21.0
+evaluate==0.4.3
+scikit-learn==1.5.2
+pandas==2.2.3
+matplotlib==3.9.2
+numpy==1.26.4

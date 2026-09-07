@@ -17,7 +17,8 @@ REQS = Counter("predict_requests_total", "Prediction requests", ["status"])
 LAT = Histogram("predict_latency_seconds", "End-to-end predict latency",
                 buckets=(.005, .01, .025, .05, .1, .25, .5, 1.0))
 
-tok = None
+TOKENIZER_PATH = os.getenv("TOKENIZER_PATH", "tokenizer")
+tok = AutoTokenizer.from_pretrained(TOKENIZER_PATH)
 sess = None
 
 class Req(BaseModel):
